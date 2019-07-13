@@ -1,0 +1,17 @@
+{
+  "name": "mailchimp-campaigns-left",
+  "version": "1.0.0",
+  "description": "A simple node lambda function that uses the Mailchimp API to figure out how many free campaigns you have left to send (e.g, Sends / Contacts), then sends you an email with that result after each Campaign send!",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^8.0.0"
+  },
+  "devDependencies": {
+    "node-watch": "^0.6.2"
+  }
+}
