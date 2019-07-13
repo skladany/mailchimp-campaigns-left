@@ -4,8 +4,31 @@
 
 require("dotenv").config();
 const Mailchimp = require("mailchimp-api-v3");
+const nodemailer = require("nodemailer");
+const { google } = require("googleapis");
+const OAuth2 = google.auth.OAuth2;
 
-const { API_KEY, RESET_DAY, EMAIL_LIMIT } = process.env;
+const {
+  API_KEY,
+  RESET_DAY,
+  EMAIL_LIMIT,
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET,
+  GOOGLE_REFRESH_TOKEN,
+  TO_EMAIL,
+  FROM_EMAIL
+} = process.env;
+
+/**
+ * Finds the number of campaigns left to send, and sends off an email!
+ * @return {integer} Campaigns left
+ */
+getCampaignsLeft().then(result => {
+  sendEmail(
+    `There are ${result} MailChimp Campaigns left to send!`,
+    `Hi! You can send ${result} more MailChimp Campaigns before the ${RESET_DAY}th day of this month!`
+  );
+});
 
 /**
  * Using the REST_DAY env variable, get the reset date
@@ -81,6 +104,50 @@ async function getCampaignsLeft() {
   return Math.floor((EMAIL_LIMIT - emailSent) / subscriberCount);
 }
 
-getCampaignsLeft().then(result => {
-  console.log(result);
-});
+/**
+ * Sends an email!
+ *
+ * https://medium.com/@nickroach_50526/sending-emails-with-node-js-using-smtp-gmail-and-oauth2-316fe9c790a1
+ * @param {string} Email subject
+ * @param {string} Email content
+ * @return {null} Email is sent off!
+ */
+
+async function sendEmail(subject, content) {
+  const oauth2Client = new OAuth2(
+    GOOGLE_CLIENT_ID,
+    GOOGLE_CLIENT_SECRET,
+    "https://developers.google.com/oauthplayground" // Redirect URL
+  );
+
+  oauth2Client.setCredentials({
+    refresh_token: GOOGLE_REFRESH_TOKEN
+  });
+
+  const accessToken = oauth2Client.getAccessToken();
+
+  const smtpTransport = nodemailer.createTransport({
+    service: "gmail",
+    auth: {
+      type: "OAuth2",
+      user: FROM_EMAIL,
+      clientId: GOOGLE_CLIENT_ID,
+      clientSecret: GOOGLE_CLIENT_SECRET,
+      refreshToken: GOOGLE_REFRESH_TOKEN,
+      accessToken: accessToken
+    }
+  });
+
+  const mailOptions = {
+    from: FROM_EMAIL,
+    to: TO_EMAIL,
+    subject,
+    generateTextFromHTML: true,
+    html: content
+  };
+
+  smtpTransport.sendMail(mailOptions, (error, response) => {
+    error ? console.log(error) : console.log(response);
+    smtpTransport.close();
+  });
+}
