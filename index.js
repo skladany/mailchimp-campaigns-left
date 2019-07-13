@@ -23,12 +23,15 @@ const {
  * Finds the number of campaigns left to send, and sends off an email!
  * @return {integer} Campaigns left
  */
-getCampaignsLeft().then(result => {
-  sendEmail(
-    `There are ${result} MailChimp Campaigns left to send!`,
-    `Hi! You can send ${result} more MailChimp Campaigns before the ${RESET_DAY}th day of this month!`
-  );
-});
+exports.mailchimpCampaignsLeft = (req, res) => {
+  getCampaignsLeft().then(result => {
+    sendEmail(
+      `There are ${result} MailChimp Campaigns left to send!`,
+      `Hi! You can send ${result} more MailChimp Campaigns before the ${RESET_DAY}th day of this month!`
+    );
+    res.send("OK");
+  });
+};
 
 /**
  * Using the REST_DAY env variable, get the reset date
