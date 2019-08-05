@@ -28,34 +28,45 @@ exports.mailchimpCampaignsLeft = async (req, res) => {
   const emailSent = await getEmailsSent();
 
   const campaignsLeft = getCampaignsLeft(subscriberCount, emailSent);
+  console.log({ subscriberCount, emailSent, campaignsLeft });
 
-  sendEmail(
-    `There are ${campaignsLeft} MailChimp Campaigns left to send!`,
-    `Hi! You can send <strong>${campaignsLeft}</strong> more MailChimp Campaigns before the <strong>${RESET_DAY}th</strong> day of this month!<br><br><br>
-    <strong>Statistics:</strong>
-    <ul>
-        <li><strong>${emailSent}</strong> emails sent of your <strong>${EMAIL_LIMIT}</strong> email limit</li>
-        <li><strong>${subscriberCount}</strong> subscribers</li>
-        <li><strong>${EMAIL_LIMIT -
-          emailSent}</strong> more emails you can send</li>
-        <li><strong>${(EMAIL_LIMIT - emailSent) /
-          subscriberCount}</strong> campaigns left.</li>
-    </ul>`
-  );
+  // sendEmail(
+  //   `There are ${campaignsLeft} MailChimp Campaigns left to send!`,
+  //   `Hi! You can send <strong>${campaignsLeft}</strong> more MailChimp Campaigns before the <strong>${RESET_DAY}th</strong> day of this month!<br><br><br>
+  //   <strong>Statistics:</strong>
+  //   <ul>
+  //       <li><strong>${emailSent}</strong> emails sent of your <strong>${EMAIL_LIMIT}</strong> email limit</li>
+  //       <li><strong>${subscriberCount}</strong> subscribers</li>
+  //       <li><strong>${EMAIL_LIMIT -
+  //         emailSent}</strong> more emails you can send</li>
+  //       <li><strong>${(EMAIL_LIMIT - emailSent) /
+  //         subscriberCount}</strong> campaigns left.</li>
+  //   </ul>`
+  // );
 
-  res.send("OK");
+  // res.send("OK");
 };
+exports.mailchimpCampaignsLeft();
 
 /**
  * Using the REST_DAY env variable, get the reset date
  * @return {string} Reset Date
  */
-function getResetDate() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = now.getMonth() + 1; // Zero indexed
+function getLastResetDate() {
+  // Get today's Day
+  const date = new Date();
 
-  return `${year}-${month}-${RESET_DAY}`;
+  /* If Day (e.g, `date.getDate()` ) >= RESET_DAY then we want this month's month. 
+  Since the Month is zero-indexed in the date object, we increment it by one. 
+  
+  If the reverse is true, we want the previous month and since it's zero-indexed,
+  doing nothing effectively gives us that. */
+
+  if (date.getDate() >= RESET_DAY) {
+    date.setMonth(date.getMonth() + 1);
+  }
+
+  return `${date.getFullYear()}-${date.getMonth()}-${RESET_DAY}`;
 }
 
 /**
@@ -86,12 +97,12 @@ async function getSubscriberCount() {
 async function getEmailsSent() {
   const mailchimp = new Mailchimp(API_KEY);
 
-  const resetDate = getResetDate();
+  const lastResetDate = getLastResetDate();
 
   try {
     const result = await mailchimp.request({
       method: "get",
-      path: `/campaigns?since_send_time=${resetDate}`
+      path: `/campaigns?since_send_time=${lastResetDate}`
     });
 
     const emailsSent = result.campaigns.reduce(
