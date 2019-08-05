@@ -28,23 +28,22 @@ exports.mailchimpCampaignsLeft = async (req, res) => {
   const emailSent = await getEmailsSent();
 
   const campaignsLeft = getCampaignsLeft(subscriberCount, emailSent);
-  console.log({ subscriberCount, emailSent, campaignsLeft });
 
-  // sendEmail(
-  //   `There are ${campaignsLeft} MailChimp Campaigns left to send!`,
-  //   `Hi! You can send <strong>${campaignsLeft}</strong> more MailChimp Campaigns before the <strong>${RESET_DAY}th</strong> day of this month!<br><br><br>
-  //   <strong>Statistics:</strong>
-  //   <ul>
-  //       <li><strong>${emailSent}</strong> emails sent of your <strong>${EMAIL_LIMIT}</strong> email limit</li>
-  //       <li><strong>${subscriberCount}</strong> subscribers</li>
-  //       <li><strong>${EMAIL_LIMIT -
-  //         emailSent}</strong> more emails you can send</li>
-  //       <li><strong>${(EMAIL_LIMIT - emailSent) /
-  //         subscriberCount}</strong> campaigns left.</li>
-  //   </ul>`
-  // );
+  sendEmail(
+    `There are ${campaignsLeft} MailChimp Campaigns left to send!`,
+    `Hi! You can send <strong>${campaignsLeft}</strong> more MailChimp Campaigns before the <strong>${RESET_DAY}th</strong> day of this month!<br><br><br>
+    <strong>Statistics:</strong>
+    <ul>
+        <li><strong>${emailSent}</strong> emails sent of your <strong>${EMAIL_LIMIT}</strong> email limit</li>
+        <li><strong>${subscriberCount}</strong> subscribers</li>
+        <li><strong>${EMAIL_LIMIT -
+          emailSent}</strong> more emails you can send</li>
+        <li><strong>${(EMAIL_LIMIT - emailSent) /
+          subscriberCount}</strong> campaigns left.</li>
+    </ul>`
+  );
 
-  // res.send("OK");
+  res.send("OK");
 };
 exports.mailchimpCampaignsLeft();
 
