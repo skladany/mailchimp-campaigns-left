@@ -45,7 +45,6 @@ exports.mailchimpCampaignsLeft = async (req, res) => {
 
   res.send("OK");
 };
-exports.mailchimpCampaignsLeft();
 
 /**
  * Using the REST_DAY env variable, get the reset date
