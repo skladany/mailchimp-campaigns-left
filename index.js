@@ -28,10 +28,11 @@ exports.mailchimpCampaignsLeft = async (req, res) => {
   const emailSent = await getEmailsSent();
 
   const campaignsLeft = getCampaignsLeft(subscriberCount, emailSent);
+  const nextResetDate = nextResetDate();
 
   sendEmail(
     `There are ${campaignsLeft} MailChimp Campaigns left to send!`,
-    `Hi! You can send <strong>${campaignsLeft}</strong> more MailChimp Campaigns before the <strong>${RESET_DAY}th</strong> day of this month!<br><br><br>
+    `Hi! You can send <strong>${campaignsLeft}</strong> more MailChimp Campaigns before ${nextResetDate}!<br><br><br>
     <strong>Statistics:</strong>
     <ul>
         <li><strong>${emailSent}</strong> emails sent of your <strong>${EMAIL_LIMIT}</strong> email limit</li>
@@ -63,6 +64,19 @@ function getLastResetDate() {
   if (date.getDate() >= RESET_DAY) {
     date.setMonth(date.getMonth() + 1);
   }
+
+  return `${date.getFullYear()}-${date.getMonth()}-${RESET_DAY}`;
+}
+
+/**
+ * Using getLastResetDate(), gets the next reset date
+ * @return {string} Next Reset Date
+ */
+function getNextResetDate() {
+  const date = new Date(getLastResetDate());
+
+  // Zero indexed
+  date.setMonth(date.getMonth() + 2);
 
   return `${date.getFullYear()}-${date.getMonth()}-${RESET_DAY}`;
 }
