@@ -28,7 +28,7 @@ exports.mailchimpCampaignsLeft = async (req, res) => {
   const emailSent = await getEmailsSent();
 
   const campaignsLeft = getCampaignsLeft(subscriberCount, emailSent);
-  const nextResetDate = nextResetDate();
+  const nextResetDate = getNextResetDate();
 
   sendEmail(
     `There are ${campaignsLeft} MailChimp Campaigns left to send!`,
