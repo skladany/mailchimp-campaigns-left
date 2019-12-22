@@ -4,6 +4,7 @@
 
 require("dotenv").config();
 const Mailchimp = require("mailchimp-api-v3");
+const moment = require("moment");
 const nodemailer = require("nodemailer");
 const { google } = require("googleapis");
 const OAuth2 = google.auth.OAuth2;
@@ -43,8 +44,6 @@ exports.mailchimpCampaignsLeft = async (req, res) => {
           subscriberCount}</strong> campaigns left.</li>
     </ul>`
   );
-
-  res.send("OK");
 };
 
 /**
@@ -52,20 +51,19 @@ exports.mailchimpCampaignsLeft = async (req, res) => {
  * @return {string} Reset Date
  */
 function getLastResetDate() {
-  // Get today's Day
-  const date = new Date();
+  // Get Date right Now
+  const now = moment();
 
-  /* If Day (e.g, `date.getDate()` ) >= RESET_DAY then we want this month's month. 
-  Since the Month is zero-indexed in the date object, we increment it by one. 
-  
-  If the reverse is true, we want the previous month and since it's zero-indexed,
-  doing nothing effectively gives us that. */
-
-  if (date.getDate() >= RESET_DAY) {
-    date.setMonth(date.getMonth() + 1);
+  /* If the current Day is less than the RESET_DAY, then we want last month's month, 
+  so decrement month by one. Otherwise, stay with the current month. */
+  if (now.date() < RESET_DAY) {
+    now.month(now.month() - 1);
   }
 
-  return `${date.getFullYear()}-${date.getMonth()}-${RESET_DAY}`;
+  // Set the day to the RESET_DAY
+  now.date(RESET_DAY);
+
+  return now.format("YYYY-MM-DD");
 }
 
 /**
@@ -73,12 +71,12 @@ function getLastResetDate() {
  * @return {string} Next Reset Date
  */
 function getNextResetDate() {
-  const date = new Date(getLastResetDate());
+  const now = moment(getLastResetDate());
 
   // Zero indexed
-  date.setMonth(date.getMonth() + 2);
+  now.month(now.month() + 1);
 
-  return `${date.getFullYear()}-${date.getMonth()}-${RESET_DAY}`;
+  return now.format("YYYY-MM-DD");
 }
 
 /**
@@ -190,3 +188,5 @@ async function sendEmail(subject, content) {
     smtpTransport.close();
   });
 }
+
+exports.mailchimpCampaignsLeft();
