@@ -25,29 +25,34 @@ const {
  * @return {integer} Campaigns left
  */
 exports.mailchimpCampaignsLeft = async (req, res) => {
-  const subscriberCount = await getSubscriberCount();
-  const emailSent = await getEmailsSent();
+  try {
+    const subscriberCount = await getSubscriberCount();
 
-  const campaignsLeft = getCampaignsLeft(subscriberCount, emailSent);
-  const nextResetDate = getNextResetDate();
+    const emailSent = await getEmailsSent();
 
-  sendEmail(
-    `There are ${campaignsLeft} MailChimp Campaigns left to send!`,
-    `Hi! You can send <strong>${campaignsLeft}</strong> more MailChimp Campaigns before ${nextResetDate}!<br><br><br>
-    <strong>Statistics:</strong>
-    <ul>
-        <li><strong>${emailSent}</strong> emails sent of your <strong>${EMAIL_LIMIT}</strong> email limit</li>
-        <li><strong>${subscriberCount}</strong> subscribers</li>
-        <li><strong>${
-          EMAIL_LIMIT - emailSent
-        }</strong> more emails you can send</li>
-        <li><strong>${
-          (EMAIL_LIMIT - emailSent) / subscriberCount
-        }</strong> campaigns left.</li>
-    </ul>`
-  );
+    const campaignsLeft = getCampaignsLeft(subscriberCount, emailSent);
+    const nextResetDate = getNextResetDate();
 
-  res.send("OK");
+    sendEmail(
+      `There are ${campaignsLeft} MailChimp Campaigns left to send!`,
+      `Hi! You can send <strong>${campaignsLeft}</strong> more MailChimp Campaigns before ${nextResetDate}!<br><br><br>
+      <strong>Statistics:</strong>
+      <ul>
+          <li><strong>${emailSent}</strong> emails sent of your <strong>${EMAIL_LIMIT}</strong> email limit</li>
+          <li><strong>${subscriberCount}</strong> subscribers</li>
+          <li><strong>${
+            EMAIL_LIMIT - emailSent
+          }</strong> more emails you can send</li>
+          <li><strong>${
+            (EMAIL_LIMIT - emailSent) / subscriberCount
+          }</strong> campaigns left.</li>
+      </ul>`
+    );
+
+    res.send("OK");
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 /**
