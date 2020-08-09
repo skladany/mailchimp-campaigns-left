@@ -17,7 +17,7 @@ const {
   GOOGLE_CLIENT_SECRET,
   GOOGLE_REFRESH_TOKEN,
   TO_EMAIL,
-  FROM_EMAIL
+  FROM_EMAIL,
 } = process.env;
 
 /**
@@ -38,12 +38,16 @@ exports.mailchimpCampaignsLeft = async (req, res) => {
     <ul>
         <li><strong>${emailSent}</strong> emails sent of your <strong>${EMAIL_LIMIT}</strong> email limit</li>
         <li><strong>${subscriberCount}</strong> subscribers</li>
-        <li><strong>${EMAIL_LIMIT -
-          emailSent}</strong> more emails you can send</li>
-        <li><strong>${(EMAIL_LIMIT - emailSent) /
-          subscriberCount}</strong> campaigns left.</li>
+        <li><strong>${
+          EMAIL_LIMIT - emailSent
+        }</strong> more emails you can send</li>
+        <li><strong>${
+          (EMAIL_LIMIT - emailSent) / subscriberCount
+        }</strong> campaigns left.</li>
     </ul>`
   );
+
+  res.send("OK");
 };
 
 /**
@@ -89,7 +93,7 @@ async function getSubscriberCount() {
   try {
     const result = await mailchimp.request({
       method: "get",
-      path: "/"
+      path: "/",
     });
 
     const subcribers = await result.total_subscribers;
@@ -112,7 +116,7 @@ async function getEmailsSent() {
   try {
     const result = await mailchimp.request({
       method: "get",
-      path: `/campaigns?since_send_time=${lastResetDate}`
+      path: `/campaigns?since_send_time=${lastResetDate}`,
     });
 
     const emailsSent = result.campaigns.reduce(
@@ -158,7 +162,7 @@ async function sendEmail(subject, content) {
   );
 
   oauth2Client.setCredentials({
-    refresh_token: GOOGLE_REFRESH_TOKEN
+    refresh_token: GOOGLE_REFRESH_TOKEN,
   });
 
   const accessToken = oauth2Client.getAccessToken();
@@ -171,8 +175,8 @@ async function sendEmail(subject, content) {
       clientId: GOOGLE_CLIENT_ID,
       clientSecret: GOOGLE_CLIENT_SECRET,
       refreshToken: GOOGLE_REFRESH_TOKEN,
-      accessToken: accessToken
-    }
+      accessToken: accessToken,
+    },
   });
 
   const mailOptions = {
@@ -180,7 +184,7 @@ async function sendEmail(subject, content) {
     to: TO_EMAIL,
     subject,
     generateTextFromHTML: true,
-    html: content
+    html: content,
   };
 
   smtpTransport.sendMail(mailOptions, (error, response) => {
